@@ -1,0 +1,27 @@
+import paramiko, time
+
+def configura(host,user,passw,ip1,wildcard1,ip2,wildcard2,id):
+    conexion = paramiko.SSHClient()
+    conexion.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    conexion.connect(host, username=user, password=passw, look_for_keys=False, allow_agent=False)
+    nueva_conexion = conexion.invoke_shell()
+    nueva_conexion.send("configure terminal\n")
+    time.sleep(0.2)
+    nueva_conexion.send("router ospf 1\n")
+    time.sleep(0.2)
+    nueva_conexion.send("redistribute rip subnets \n")
+    time.sleep(0.2)
+    #nueva_conexion.send("redistribute static \n")
+    #time.sleep(0.2)
+    nueva_conexion.send("router-id "+id+"\n")
+    time.sleep(0.2)
+    nueva_conexion.send("network "+ip1+" "+wildcard1+" area 0 \n")
+    time.sleep(0.2)
+    nueva_conexion.send("network "+ip2+" "+wildcard2+" area 0 \n")
+    time.sleep(0.2)
+    nueva_conexion.send("end\n")
+    time.sleep(0.2)
+    salida = str(nueva_conexion.recv(3000))
+    conexion.close()
+
+    return str(salida)
